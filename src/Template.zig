@@ -145,11 +145,13 @@ pub const SRC_MAIN_ZIG =
     \\    _ = allocator;
     \\    _ = args;
     \\    _ = stdout;
+    \\    return 0;
     \\}
     \\
     \\fn handleRunError(stderr: *Io.Writer, err: __NAME__.Error) !u8 {
     \\    _ = stderr;
     \\    _ = err;
+    \\    return 0;
     \\}
     \\
 ;
