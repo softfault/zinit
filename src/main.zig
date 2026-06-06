@@ -24,8 +24,15 @@ pub fn main(init: std.process.Init) !void {
     const stderr = &stderr_file_writer.interface;
 
     const gpa = init.gpa;
-    const code = run(io, gpa, args, stdout) catch |err|
-        try handleRunError(stderr, err);
+    const result = run(io, gpa, args);
+    var code: u8 = 0;
+    if (result) |project_name| {
+        defer gpa.free(project_name);
+        try stdout.print("initialized Zig project: {s}\n", .{project_name});
+        code = 0;
+    } else |err| {
+        code = try handleRunError(stderr, err);
+    }
 
     try stdout_file_writer.flush();
     try stderr_file_writer.flush();
@@ -37,11 +44,10 @@ pub fn run(
     io: Io,
     allocator: std.mem.Allocator,
     args: []const []const u8,
-    stdout: *Io.Writer,
-) zinit.Error!u8 {
+) zinit.Error![]const u8 { // 这里的返回值其实类似于整个程序Context的一个output。只是没有那样非常形式化的组织起来
     const config = try zinit.Config.init(args);
     const project_name = try config.execute(io, allocator);
-    defer allocator.free(project_name);
+    errdefer allocator.free(project_name);
 
     // 实际上这个地方应该用一个Plan对象管理
     // 但是暂时这样写了
@@ -49,8 +55,7 @@ pub fn run(
         .name = project_name,
     });
 
-    try stdout.print("initialized Zig project: {s}\n", .{project_name});
-    return 0;
+    return project_name;
 }
 
 fn handleRunError(stderr: *Io.Writer, err: zinit.Error) !u8 {
