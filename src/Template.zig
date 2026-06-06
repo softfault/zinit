@@ -159,7 +159,7 @@ pub const SRC_ROOT_ZIG =
     \\const Io = std.Io;
     \\const Allocator = std.mem.Allocator;
     \\
-    \\const Error = error{};
+    \\pub const Error = error{};
     \\
 ;
 
