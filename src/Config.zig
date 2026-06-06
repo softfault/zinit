@@ -35,6 +35,7 @@ pub fn init(args: []const []const u8) Error!@This() {
     };
 }
 
+/// 返回的字符串是拥有所有权的
 pub fn execute(
     self: *const @This(),
     io: Io,
