@@ -20,9 +20,6 @@ pub fn render(
     var rendered = try allocator.dupe(u8, file_content);
     errdefer allocator.free(rendered);
 
-    // 性能稍微有点烂
-    // 要用很多次分配
-    // arena?
     for (self.replacements) |replacement| {
         const next = try std.mem.replaceOwned(
             u8,
@@ -109,49 +106,21 @@ pub const SRC_MAIN_ZIG =
     \\const std = @import("std");
     \\const Io = std.Io;
     \\
-    \\const __NAME__ = @import("__NAME__");
+    \\const app = @import("__NAME__");
     \\
     \\pub fn main(init: std.process.Init) !void {
-    \\    const arena = init.arena.allocator();
-    \\    const args = try init.minimal.args.toSlice(arena);
-    \\
     \\    const io = init.io;
     \\
     \\    var stdout_buffer: [1024]u8 = undefined;
     \\    var stdout_file_writer: Io.File.Writer = .init(.stdout(), io, &stdout_buffer);
     \\    const stdout = &stdout_file_writer.interface;
     \\
-    \\    var stderr_buffer: [1024]u8 = undefined;
-    \\    var stderr_file_writer: Io.File.Writer = .init(.stderr(), io, &stderr_buffer);
-    \\    const stderr = &stderr_file_writer.interface;
-    \\
-    \\    const gpa = init.gpa;
-    \\    const code = run(io, gpa, args, stdout) catch |err|
-    \\        try handleRunError(stderr, err);
-    \\
+    \\    try run(stdout);
     \\    try stdout_file_writer.flush();
-    \\    try stderr_file_writer.flush();
-    \\
-    \\    std.process.exit(code);
     \\}
     \\
-    \\pub fn run(
-    \\    io: Io,
-    \\    allocator: std.mem.Allocator,
-    \\    args: []const []const u8,
-    \\    stdout: *Io.Writer,
-    \\) __NAME__.Error!u8 {
-    \\    _ = io;
-    \\    _ = allocator;
-    \\    _ = args;
-    \\    _ = stdout;
-    \\    return 0;
-    \\}
-    \\
-    \\fn handleRunError(stderr: *Io.Writer, err: __NAME__.Error) !u8 {
-    \\    _ = stderr;
-    \\    _ = err;
-    \\    return 0;
+    \\pub fn run(stdout: *Io.Writer) !void {
+    \\    try app.hello(stdout);
     \\}
     \\
 ;
@@ -159,9 +128,10 @@ pub const SRC_MAIN_ZIG =
 pub const SRC_ROOT_ZIG =
     \\const std = @import("std");
     \\const Io = std.Io;
-    \\const Allocator = std.mem.Allocator;
     \\
-    \\pub const Error = error{};
+    \\pub fn hello(stdout: *Io.Writer) !void {
+    \\    try stdout.print("Hello, __NAME__!\n", .{});
+    \\}
     \\
 ;
 
