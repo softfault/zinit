@@ -165,6 +165,7 @@ pub const SRC_ROOT_ZIG =
 
 pub const GIT_IGNORE =
     \\/.zig-cache/
+    \\/zig-out/
     \\
 ;
 
