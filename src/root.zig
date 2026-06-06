@@ -22,17 +22,18 @@ pub fn initExeProject(
     dir: Io.Dir,
     metadata: ProjectMetadata,
 ) Error!void {
-    dir.createDirPath(io, "src") catch |err| switch (err) {
-        error.PathAlreadyExists => return error.ProjectAlreadyExists,
-        else => |e| return e,
-    };
-
     const replacements = [_]Template.Replacement{
         .{ .placeholder = "__NAME__", .value = metadata.name },
     };
     const template: Template = .{ .replacements = &replacements };
 
     for (Template.exe_files) |file| {
+        if (std.fs.path.dirname(file.path)) |dirname| {
+            // createDirPath会递归的创建好文件以及对应的目录
+            // 类似于`mkdir -p`
+            try dir.createDirPath(io, dirname);
+        }
+
         const rendered = try template.render(allocator, file.body);
         defer allocator.free(rendered);
 

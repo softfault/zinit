@@ -40,6 +40,8 @@ pub const File = struct {
     body: []const u8,
 };
 
+/// 不要在这里的.path写目录
+/// 确保都是文件
 pub const exe_files = [_]File{
     .{ .path = "build.zig", .body = BUILD_ZIG },
     .{ .path = "src/main.zig", .body = SRC_MAIN_ZIG },
