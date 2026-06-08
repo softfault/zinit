@@ -44,12 +44,14 @@ pub const File = struct {
 /// 确保都是文件
 pub const exe_files = [_]File{
     .{ .path = "build.zig", .body = BUILD_ZIG },
+    .{ .path = "build.zig.zon", .body = BUILD_ZIG_ZON },
     .{ .path = "src/main.zig", .body = SRC_MAIN_ZIG },
     .{ .path = "src/root.zig", .body = SRC_ROOT_ZIG },
     .{ .path = ".gitignore", .body = GIT_IGNORE },
     .{ .path = "README.md", .body = README_MD },
 };
 
+/// `__PACKAGE_NAME__`: importable package name
 /// `__NAME__`: name of the program & the folder
 pub const BUILD_ZIG =
     \\const std = @import("std");
@@ -58,7 +60,7 @@ pub const BUILD_ZIG =
     \\    const target = b.standardTargetOptions(.{});
     \\    const optimize = b.standardOptimizeOption(.{});
     \\
-    \\    const mod = b.addModule("__NAME__", .{
+    \\    const mod = b.addModule("__PACKAGE_NAME__", .{
     \\        .root_source_file = b.path("src/root.zig"),
     \\        .target = target,
     \\    });
@@ -70,7 +72,7 @@ pub const BUILD_ZIG =
     \\            .target = target,
     \\            .optimize = optimize,
     \\            .imports = &.{
-    \\                .{ .name = "__NAME__", .module = mod },
+    \\                .{ .name = "__PACKAGE_NAME__", .module = mod },
     \\            },
     \\        }),
     \\    });
@@ -103,12 +105,33 @@ pub const BUILD_ZIG =
     \\
 ;
 
-/// `__NAME__`: name of the program & the folder
+/// `__PACKAGE_NAME__`: package name as a Zig enum literal
+/// `__FINGERPRINT__`: generated package fingerprint
+/// `__ZIG_VERSION__`: minimum Zig version
+pub const BUILD_ZIG_ZON =
+    \\.{
+    \\    .name = .__PACKAGE_NAME__,
+    \\    .version = "0.0.0",
+    \\    .fingerprint = __FINGERPRINT__, // Changing this has security and trust implications.
+    \\    .minimum_zig_version = "__ZIG_VERSION__",
+    \\    .dependencies = .{},
+    \\    .paths = .{
+    \\        "build.zig",
+    \\        "build.zig.zon",
+    \\        "src",
+    \\        "README.md",
+    \\        ".gitignore",
+    \\    },
+    \\}
+    \\
+;
+
+/// `__PACKAGE_NAME__`: importable package name
 pub const SRC_MAIN_ZIG =
     \\const std = @import("std");
     \\const Io = std.Io;
     \\
-    \\const app = @import("__NAME__");
+    \\const app = @import("__PACKAGE_NAME__");
     \\
     \\pub fn main(init: std.process.Init) !void {
     \\    const io = init.io;
